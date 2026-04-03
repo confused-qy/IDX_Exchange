@@ -1,9 +1,12 @@
+import csv
 from pathlib import Path
 
 
 def count_rows(path: Path) -> int:
-    with path.open('r', encoding='utf-8', errors='ignore') as f:
-        return sum(1 for _ in f) - 1  # minus header
+    with path.open('r', encoding='utf-8', errors='ignore', newline='') as f:
+        reader = csv.reader(f)
+        next(reader, None)  # skip header
+        return sum(1 for _ in reader)
 
 
 def main() -> None:
@@ -27,9 +30,17 @@ def main() -> None:
 
     listed_total = sum(c for _, c in listed_counts)
     sold_total = sum(c for _, c in sold_counts)
+    listed_final = root  / 'Listed_Final.csv'
+    sold_final = root /  'Sold_Final.csv'
+    listed_final_rows = count_rows(listed_final) if listed_final.exists() else None
+    sold_final_rows = count_rows(sold_final) if sold_final.exists() else None
 
     print('Listed total rows:', f'{listed_total:,}')
     print('Sold total rows:  ', f'{sold_total:,}')
+    if listed_final_rows is not None:
+        print('Listed_Final rows:', f'{listed_final_rows:,}')
+    if sold_final_rows is not None:
+        print('Sold_Final rows:  ', f'{sold_final_rows:,}')
     print('')
     print('Listed monthly row counts:')
     for name, c in listed_counts:
